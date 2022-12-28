@@ -1,0 +1,548 @@
+library(ggplot2)
+library(plyr)
+library(ggpubr)
+library(data.table)
+library(carData)
+library(car)
+library(pscl)
+library(ggrepel)
+library(patchwork)
+library(reshape2)
+library(tidyr)
+library(survival)
+library(survminer)
+library(dplyr)
+library(lubridate)
+library(reshape2)
+library(scales)
+library(forcats)
+library(corrplot)
+library(Hmisc)
+options(ggrepel.max.overlaps = Inf)
+
+#District& Territory Demographic
+DD<-read.csv("dis_inc_cfr.csv")
+DS<-read.csv("dis_inc_cfr_symptomatic.csv")
+TS<-read.csv("Territory_symptomatic.csv")
+
+#Scatter Plot_Total#
+Scatter_Total_CI_I<-ggplot(DD,aes(x=Income_1k, y=Cumulative.Incidence.Rate_percentage, size =population_density, label=District)) + 
+  geom_vline(xintercept=c(mean(DD$Income_1k)), linetype="dashed",lwd=1) + 
+  geom_label_repel(size = 5,min.segment.length = 0, box.padding = 0.5)+ geom_point(alpha=0.7)+
+  xlab("Median monthly income (HKD$ '000)") + ylab("Cumulative incidence (cases per 1000 people)") + labs(size="Population density")
+Scatter_Total_CI_I<-Scatter_Total_CI_I + scale_x_continuous(expand= c(0,0), limits = c(20,46),breaks = seq(20, 46, 4)) +
+  scale_y_continuous(expand=c(0,0), limits=c(0,0.38), breaks= seq(0,0.35,0.05)) + labs(size="Population density")+
+  theme(axis.text=element_text(size=18), axis.title = element_text(size = 17), legend.position = c(0.85,0.84)) 
+Scatter_Total_CI_I
+
+Scatter_Total_CFR_I<-ggplot(DD,aes(x=Income_1k, y=cfr_percent, size =population_density, label=District)) + 
+  geom_vline(xintercept=c(mean(DD$Income_1k)), linetype="dashed",lwd=1) +
+  geom_label_repel(size = 5,min.segment.length = 0, box.padding = 0.5)+ geom_point(alpha=0.7)+
+  xlab("Median monthly income (HKD$ '000)") + ylab("Case fatality rate (%)")
+Scatter_Total_CFR_I<-Scatter_Total_CFR_I + scale_x_continuous(expand= c(0,0), limits = c(20,46),breaks = seq(20, 46, 4)) +
+  scale_y_continuous(expand=c(0,0), limits=c(0,4.5), breaks= seq(0,4.5,0.5)) + labs(size="Population density")+
+  theme(axis.text=element_text(size=18), axis.title = element_text(size = 17), legend.position = c(0.85,0.835)) 
+Scatter_Total_CFR_I
+
+Scatter_Total_CI_PD<-ggplot(DD,aes(x=population.density_1k, y=Cumulative.Incidence.Rate_percentage, label=District))+ 
+  geom_vline(xintercept=c(mean(DD$population.density_1k)), linetype="dashed",lwd=1) +
+  geom_label_repel(size = 5,min.segment.length = 0, box.padding = 0.5)+ geom_point(alpha=0.7)+
+  xlab("Population density (1000 person per sq. km)") + ylab("Cumulative incidence (cases per 1000 people)")
+Scatter_Total_CI_PD<-Scatter_Total_CI_PD + scale_x_continuous(expand= c(0,0), limits = c(0,65),breaks = seq(0, 60, 10)) +
+  scale_y_continuous(expand=c(0,0), limits=c(0,0.38), breaks= seq(0,0.35,0.05))+
+  theme(axis.text=element_text(size=18), axis.title = element_text(size = 17))
+Scatter_Total_CI_PD
+
+Scatter_Total_CFR_PD<-ggplot(DD,aes(x=population.density_1k, y=cfr_percent, label=District)) + 
+  geom_vline(xintercept=c(mean(DD$population.density_1k)), linetype="dashed",lwd=1) +
+  geom_label_repel(size = 5,min.segment.length = 0, box.padding = 0.5)+ geom_point(alpha=0.7)+
+  xlab("Population density (1000 person per sq. km)") + ylab("Case fatality rate (%)")
+Scatter_Total_CFR_PD<-Scatter_Total_CFR_PD + scale_x_continuous(expand= c(0,0), limits = c(0,65),breaks = seq(0, 60, 10)) +
+  scale_y_continuous(expand=c(0,0), limits=c(0,4.5), breaks= seq(0,4.5,0.5))+
+  theme(axis.text=element_text(size=18), axis.title = element_text(size = 17))
+Scatter_Total_CFR_PD
+
+FigureS4<-ggarrange(Scatter_Total_CI_I,Scatter_Total_CFR_I,Scatter_Total_CI_PD,Scatter_Total_CFR_PD,
+                    labels = c("A","B","C","D"),font.label = list(size = 16),
+                    ncol = 2, nrow = 2)
+
+#Scatter Plot_Symptomatic#
+Scatter_Symptomatic_CI_I<-ggplot(DS,aes(x=income_trans, y=inc_perk, size =population_density, label=District)) + 
+  geom_vline(xintercept=c(mean(DD$Income_1k)), linetype="dashed",lwd=1) +
+  geom_label_repel(size = 5,min.segment.length = 0, box.padding = 0.5)+ geom_point(alpha=0.7)+
+  xlab("Median monthly income (HKD$ '000)") + ylab("Cumulative incidence (cases per 1000 people)") + labs(size="Population density")
+Scatter_Symptomatic_CI_I<-Scatter_Symptomatic_CI_I + scale_x_continuous(expand= c(0,0), limits = c(20,46),breaks = seq(20, 46, 4)) +
+  scale_y_continuous(expand=c(0,0), limits=c(0,2.5), breaks= seq(0,2.5,0.5)) + labs(size="Population density")+
+  theme(axis.text=element_text(size=18), axis.title = element_text(size = 17), legend.position = c(0.8,0.84),
+        legend.title = element_text(size=16),legend.text = element_text(size=15))
+Scatter_Symptomatic_CI_I
+
+Scatter_Symptomatic_CFR_I<-ggplot(DS,aes(x=income_trans, y=cfr_percent, size =population_density, label=District)) + 
+  geom_vline(xintercept=c(mean(DD$Income_1k)), linetype="dashed",lwd=1) +
+  geom_label_repel(size = 5,min.segment.length = 0, box.padding = 0.5)+ geom_point(alpha=0.7) +
+  xlab("Median monthly income (HKD$ '000)") + ylab("Case fatality rate (%)")
+Scatter_Symptomatic_CFR_I<-Scatter_Symptomatic_CFR_I + scale_x_continuous(expand= c(0,0), limits = c(20,46),breaks = seq(20, 46, 4)) +
+  scale_y_continuous(expand=c(0,0), limits=c(0,4.5), breaks= seq(0,4.5,0.5)) + labs(size="Population density")+
+  theme(axis.text=element_text(size=18), axis.title = element_text(size = 17), legend.position = c(0.8,0.835),
+        legend.title = element_text(size=16),legend.text = element_text(size=15))
+Scatter_Symptomatic_CFR_I
+
+Scatter_Symptomatic_CI_PD<-ggplot(DS,aes(x=population_density_1000, y=inc_perk, label=District)) + 
+  geom_vline(xintercept=c(mean(DD$population.density_1k)), linetype="dashed",lwd=1) +
+  geom_label_repel(size = 5,min.segment.length = 0, box.padding = 0.5)+ geom_point(alpha=0.7) +
+  xlab("Population density (1000 Person per sq. km)") + ylab("Cumulative incidence (cases per 1000 people)")
+Scatter_Symptomatic_CI_PD<-Scatter_Symptomatic_CI_PD + scale_x_continuous(expand= c(0,0), limits = c(0,65),breaks = seq(0, 60, 10)) +
+  scale_y_continuous(expand=c(0,0), limits=c(0,2.5), breaks= seq(0,2.5,0.5))+
+  theme(axis.text=element_text(size=18), axis.title = element_text(size = 17))
+Scatter_Symptomatic_CI_PD
+
+Scatter_Symptomatic_CFR_PD<-ggplot(DS,aes(x=population_density_1000, y=cfr_percent, label=District)) + 
+  geom_vline(xintercept=c(mean(DD$population.density_1k)), linetype="dashed",lwd=1) +
+  geom_label_repel(size = 5,min.segment.length = 0, box.padding = 0.5)+ geom_point(alpha=0.7)+
+  xlab("Population density (1000 Person per sq. km)") + ylab("Case fatality rate (%)")
+Scatter_Symptomatic_CFR_PD<-Scatter_Symptomatic_CFR_PD + scale_x_continuous(expand= c(0,0), limits = c(0,65),breaks = seq(0, 60, 10)) +
+  scale_y_continuous(expand=c(0,0), limits=c(0,4.5), breaks= seq(0,4.5,0.5))+
+  theme(axis.text=element_text(size=18), axis.title = element_text(size = 17))
+Scatter_Symptomatic_CFR_PD
+
+Figure2<-ggarrange(Scatter_Symptomatic_CI_I,Scatter_Symptomatic_CFR_I,Scatter_Symptomatic_CI_PD,Scatter_Symptomatic_CFR_PD,
+                   labels = c("A","B","C","D"),font.label = list(size = 16),
+                   ncol = 2, nrow = 2)
+
+#Bar Chart_Symptomatic
+level_order_TS<- factor(TS$Territory, level = c("KLE", "KLW", "NTW","HK","NTE"))
+
+TS_CFR<-ggplot(TS, aes(x = level_order_TS, cfr,2, label=cfr)) + 
+  geom_bar(stat = "identity") + 
+  ggtitle("Case fatality rate") +
+  xlab("Territories") +
+  ylab("Percentage (%)") +
+  geom_text(size = 5, position = position_stack(vjust =0.95), color="white") +
+  scale_y_continuous(expand= c(0,0),breaks = seq(0, 3.5, 0.5)) + coord_cartesian(ylim = c(0, 3.5)) +
+  theme(axis.text=element_text(size=16), axis.title = element_text(size = 15),plot.title = element_text(size = 15))
+TS_CFR
+
+TS_CDP<-ggplot(TS, aes(x = level_order_TS, y = CDPinPop_percent, label=CDPinPop_percent)) + 
+  geom_bar(stat = "identity") +
+  ggtitle("People with chronic disease") + ylab("Percentage (%)") +
+  xlab("Territories") +
+  geom_text(size = 5, position = position_stack(vjust =0.98), color="white") +
+  scale_y_continuous(expand= c(0,0)) + coord_cartesian(ylim = c(20, 26)) +
+  theme(axis.text=element_text(size=16), axis.title = element_text(size = 15),plot.title = element_text(size = 15))
+TS_CDP
+
+FigureS2<-ggarrange(TS_CFR,TS_CDP,
+                    labels = c("A","B"),
+                    ncol = 2)
+
+#Reporting Delay with different variables
+Covid2<-read.csv("Covid model_symptomatic.csv")
+Covid2_Delay<-read.csv("DeathRisk.csv")
+Covid2_Delay2<-read.csv("DeathRisk_Individual.csv")
+Covid2_agepercent<-read.csv("Covid model_symptomatic_2Income.csv")
+
+Covid2$Income.Region<-factor(Covid2$Income.Region,levels=c("Low Income Region","Middle Income Region","High Income Region"))
+Covid2$Grouped.Delay.Time <- factor(Covid2$Grouped.Delay.Time, level = c("0", "1", "2","3","4","5","6","7","8","9","10",">10"))
+
+Covid2_agepercent$Income.Region<-factor(Covid2_agepercent$Income.Region,levels=c("High Income Region","Low and Middle Income Region"))
+Covid2_agepercent$Gender.Age<-factor(Covid2_agepercent$Gender.Age,levels=c("Male(≤65 years old)","Female(≤65 years old)","Male(>65 years old)","Female(>65 years old)"))
+
+#Subset Data
+Covid2_65<-Covid2 %>% filter(is.na(Age) | Age >= 65)
+Covid2_65$Income.Region<-factor(Covid2_65$Income.Region,levels=c("Low Income Region","Middle Income Region","High Income Region"))
+
+Delay_Total_LMH<-Covid2 %>% group_by(Income.Region)%>%count(Grouped.Delay.Time)
+Delay_Total_LMH<-Delay_Total_LMH %>% group_by(Income.Region) %>% mutate(percentage=n/sum(n)*100)
+
+Delay_Elderly_LMH<-Covid2_65 %>% group_by(Income.Region) %>% count(Grouped.Delay.Time)
+Delay_Elderly_LMH<-Delay_Elderly_LMH %>% group_by(Income.Region) %>% mutate(percentage=n/sum(n)*100)
+Delay <- data.frame(Income.Region=c("High Income Region"),Grouped.Delay.Time=c(0),n=c(0),percentage=c(0))
+Delay$Grouped.Delay.Time<-as.factor(Delay$Grouped.Delay.Time)
+Delay_Elderly_LMH<-rbind(Delay_Elderly_LMH, Delay)
+remove(Delay)
+
+#CFR over delay time
+Covid2_Delay$Delay.Time <- factor(Covid2_Delay$Delay.Time, level = c(">1",">2",">3",">4",">5",">6",">7",">8",">9",">10",">11",">12"))
+CFR_delay<-ggplot(Covid2_Delay,aes(x=Delay.Time, y=cfr_percent, group=1)) + geom_point(size = 5) + geom_line(size = 2) + 
+  xlab("Reporting delay (days)") + ylab("Case fatality rate (%)") +
+  scale_y_continuous(expand=c(0,0), limits=c(0,4.2), breaks= seq(0,4,1)) +
+  theme(axis.text=element_text(size=28), axis.title = element_text(size = 30))
+CFR_delay
+
+Covid2_Delay2$Delay.time <- as.factor(Covid2_Delay2$Delay.time)
+CFR_delay2<-ggplot(Covid2_Delay2,aes(x=Delay.time, y=CFR_3days,group=1)) + geom_point(size = 5) + geom_line(size = 2) + 
+  xlab("Reporting delay (days)") + ylab("Case fatality rate (%)") + ggtitle("") +
+  scale_y_continuous(expand=c(0,0), limits=c(0,3.2), breaks= seq(0,3,1)) +
+  theme(axis.text=element_text(size= 28), axis.title = element_text(size = 30))
+CFR_delay2
+
+Figure3<-ggarrange(CFR_delay, CFR_delay2,
+                   labels = c("A","B"),font.label = list(size = 24),
+                   ncol = 1)
+
+#Proportion of delayed reporting time of symptomatic patients
+level_order_Delay_Total  <- factor(Delay_Total_LMH$Grouped.Delay.Time, level = c("0", "1", "2","3","4","5","6","7","8","9","10",">10"))
+Bar_Delay_Total_LMH<-ggplot(Delay_Total_LMH, aes(x=level_order_Delay_Total , y=percentage, label=percentage, fill = Income.Region, group = Income.Region)) + geom_bar(stat="identity", position = "dodge") + 
+  ggtitle("Symptomatic patients") + xlab("Delay time (Days)") + 
+  ylab("Percentage with different delay time") +
+  scale_y_continuous(expand=c(0,0), limits = c(0, 25), breaks = seq(0, 25, 5)) + labs(fill="Income Region") +
+  theme(plot.title = element_text(size=24), axis.text=element_text(size=23), axis.title = element_text(size = 24),
+        legend.position = c(0.77,0.74), legend.key.size = unit(2,"cm"),legend.title = element_text(size=20),legend.text = element_text(size=18))
+Bar_Delay_Total_LMH
+
+#Proportion of delayed reporting time of elderly patients
+Delay_Elderly_LMH$Income.Region<-factor(Delay_Elderly_LMH$Income.Region,levels=c("Low Income Region","Middle Income Region","High Income Region"))
+level_order_Delay_Elderly <- factor(Delay_Elderly_LMH$Grouped.Delay.Time, level = c("0", "1", "2","3","4","5","6","7","8","9","10",">10"))
+
+Bar_Delay_Elderly_LMH<-ggplot(Delay_Elderly_LMH, aes(x=level_order_Delay_Elderly , y=percentage, label=percentage, fill = Income.Region, group = Income.Region)) + geom_bar(stat="identity", position = "dodge") + 
+  ggtitle("Symptomatic elderly patients") + xlab("Delay time (Days)") + ylab("Percentage with different delay time") +
+  scale_y_continuous(expand=c(0,0), limits = c(0, 25), breaks = seq(0, 25, 5)) + labs(fill="Income Region") +
+  theme(plot.title = element_text(size=24), axis.text=element_text(size=23), axis.title = element_text(size = 24), 
+        legend.position = c(0.77,0.74), legend.key.size = unit(2,"cm"),legend.title = element_text(size=20),legend.text = element_text(size=18))
+Bar_Delay_Elderly_LMH
+
+#Percentage of severe delay patients
+my.labels <- c("   Low and middle \n income region",
+               "High \n income region")
+Bar_Percentage<-ggplot(Covid2_agepercent, aes(x= fct_rev(Income.Region), y= Percentage, fill = fct_rev(Gender.Age))) + 
+  ggtitle("Symptomatic patients") + xlab("") + coord_flip() +
+  ylab("Percentage with severe reporting delay (>10 days)") + scale_x_discrete(labels= my.labels) +
+  geom_col(width = 0.6, position = position_dodge(0.7)) +
+  scale_fill_viridis_d(breaks = rev, direction = -1) +
+  scale_y_continuous(expand=c(0,0), limits = c(0, 13), breaks = seq(0, 12, 2)) + labs(fill="Income Region") +
+  theme(plot.title = element_text(size=24), axis.text.x=element_text(size= 22), 
+        axis.title = element_text(size = 24), axis.text.y =element_text(size= 24, angle = 90,vjust = 0.7, hjust=0.5,color = "#000000"),
+        legend.position = c(0.8,0.8), legend.key.size = unit(1,"cm"),
+        legend.title = element_text(size=20),legend.text = element_text(size=18)) +
+  scale_fill_manual(values = c("Male(≤65 years old)" = "#ADD8E6","Female(≤65 years old)" = "#ffcccb","Male(>65 years old)" = "#00008B","Female(>65 years old)" = "#8b0000"))
+Bar_Percentage
+
+Figure4<-ggarrange(Bar_Delay_Total_LMH,Bar_Delay_Elderly_LMH,Bar_Percentage,
+                   labels = c("A","B","C"),
+                   ncol = 1,nrow=3)
+
+#Survival Analysis
+Covid<-read.csv("Covid model.csv")
+Covid2<-read.csv("Covid model_symptomatic.csv")
+#Subset Data for survival
+Survival<-subset(Covid,select = -c(Number,Situation,district,Income,Population.Density,Income.Region2,Report,Onset,Outdate,Delay.Time,Numeric_Gender))
+Survival2<-subset(Covid2,select = -c(Report,Onset,Outdate,Grouped.Delay.Time))
+
+Survival$Gender<-factor(Survival$Gender,levels=c("F","M"))
+Survival$Age.Group<-as.factor(Survival$Age.Group)
+Survival$Age.Group<-factor(Survival$Age.Group,levels=c("0","1","2","3","4"))
+Survival$Age.Group2<-factor(Survival$Age.Group2,levels=c("45-64","0-44","65+"))
+
+Survival2$Gender<-factor(Survival2$Gender,levels=c("F","M"))
+Survival2$Age.Group<-factor(Survival2$Age.Group,levels=c("0","1","2","3","4"))
+Survival2$Age.Group2<-factor(Survival2$Age.Group2,levels=c("45-64","0-44","65+"))
+Survival2$Delay.Time3<-factor(Survival2$Delay.Time3,levels=c("0-10",">10"))
+
+#Kaplan-Meier (K-M) non-parametric analysis of all Covid-19 patients#
+KMSurvival<-survfit(Surv(Hospitalization.time,event) ~ 1, data= Survival)
+summary(KMSurvival)
+KMPlot<-ggsurvplot(KMSurvival,
+                   conf.int = T, risk.table = F,
+                   palette = "lancet", xlab= "", ylab= "Survival probability",
+                   surv.scale="percent",
+                   censor= T, censor.shape= 124, censor.size= 2,
+                   font.legend = list(size = 24, face = "bold"),
+                   axes.offset=FALSE, break.x.by=10,break.y.by=0.1,
+                   ylim= c(0.5,1), 
+                   ggtheme = theme_survminer(font.caption = c(24),font.x = c(24),font.y = c(24),font.tickslab = c(24)),
+                   legend.title="") + 
+  guides(color=guide_legend(override.aes = list(size = 2)))
+
+KMPlot<-KMPlot$plot+ coord_cartesian(xlim = c(0, 105))
+KMPlot
+
+##Kaplan-Meier (K-M) non-parametric analysis by group##
+#Gender group
+KMSurvival_Gender <- survfit(Surv(Hospitalization.time,event) ~ Gender, data=Survival)
+summary(KMSurvival_Gender)
+KMPlot_Gender<-ggsurvplot(KMSurvival_Gender,
+                          xlab= "", ylab= "Survival probability",
+                          legend.title="Gender", pval = TRUE, pval.coord = c(1, 0.55), pval.size= 8,
+                          conf.int = F, conf.int.alpha= 0.2, font.legend = list(size = 24, face = "bold"),
+                          legend.labs= c("Female","Male"),
+                          ylim= c(0.5,1),
+                          risk.table.fontsize = 5.5,
+                          censor= T, censor.shape= 124, censor.size= 2,
+                          risk.table = F, palette = "lancet",
+                          surv.scale="percent", 
+                          ggtheme = theme_survminer(font.caption = c(24),font.x = c(24),font.y = c(24),font.tickslab = c(24)),
+                          axes.offset=FALSE, break.x.by=10,break.y.by=0.1) + 
+  guides(color=guide_legend(override.aes = list(size = 2)))
+
+KMPlot_Gender<-KMPlot_Gender$plot+ coord_cartesian(xlim = c(0, 105))
+KMPlot_Gender
+
+#Age group
+KMSurvival_Age <- survfit(Surv(Hospitalization.time,event) ~ Age.Group, data=Survival)
+summary(KMSurvival_Age)
+KMPlot_Age<-ggsurvplot(KMSurvival_Age,
+                       xlab= "Day", ylab= "Survival probability",
+                       legend.title="Age",pval = TRUE, pval.coord = c(1, 0.55), pval.size= 8,
+                       conf.int = F, conf.int.alpha= 0.2, font.legend = list(size = 24, face = "bold"),
+                       legend.labs= c("0-14","15-24","25-44","45-64","65+"),
+                       ylim= c(0.5,1),
+                       risk.table.fontsize = 5.5,
+                       censor= T, censor.shape= 124, censor.size= 2,
+                       risk.table = F, palette = "lancet",
+                       surv.scale="percent",
+                       ggtheme = theme_survminer(font.caption = c(24),font.x = c(24),font.y = c(24),font.tickslab = c(24)),
+                       axes.offset=FALSE, break.x.by=10,break.y.by=0.1) +
+  guides(color=guide_legend(override.aes = list(size = 2)))
+
+KMPlot_Age<-KMPlot_Age$plot+ coord_cartesian(xlim = c(0, 105))
+KMPlot_Age
+
+#Income Regions Group
+KMSurvival_Income <- survfit(Surv(Hospitalization.time,event) ~ Income.Region, data=Survival)
+summary(KMSurvival_Income)
+KMPlot_Income<-ggsurvplot(KMSurvival_Income,
+                          xlab= "Day", ylab= "Survival probability",
+                          legend.title="Income region",pval = TRUE, pval.coord = c(1, 0.55), pval.size= 8,
+                          conf.int = F, conf.int.alpha= 0.2, font.legend = list(size = 24, face = "bold"),
+                          legend.labs= c("High income region","Low income region","Middle income region"),
+                          ylim= c(0.5,1),
+                          risk.table.fontsize = 5.5,
+                          censor= T, censor.shape= 124, censor.size= 2,
+                          risk.table = F, palette = "lancet",
+                          surv.scale="percent", 
+                          ggtheme = theme_survminer(font.caption = c(24),font.x = c(24),font.y = c(24),font.tickslab = c(24)),
+                          axes.offset=FALSE, break.x.by=10,break.y.by=0.1) + 
+  guides(color=guide_legend(nrow=2,override.aes = list(size = 2)))
+
+KMPlot_Income<-KMPlot_Income$plot+ coord_cartesian(xlim = c(0, 105))
+KMPlot_Income
+
+FigureS5<-ggarrange(KMPlot,KMPlot_Gender,KMPlot_Age,KMPlot_Income,
+                    labels = c("A","B","C","D"), font.label = list(size = 19),
+                    ncol = 2, nrow = 2)
+
+##Kaplan-Meier (K-M) non-parametric analysis of Symptomatic Patients##
+KMSurvival2<-survfit(Surv(Hospitalization.time,event) ~ 1, data= Survival2)
+summary(KMSurvival2)
+KMPlot2<-ggsurvplot(KMSurvival2,
+                    conf.int = T, risk.table = F,
+                    palette = "lancet",xlab= "",
+                    surv.scale="percent",
+                    censor= T, censor.shape= 124, censor.size= 2,
+                    font.legend = list(size = 24, face = "bold"),
+                    axes.offset=FALSE, break.x.by=10,break.y.by=0.1,
+                    ylim= c(0.5,1), 
+                    ggtheme = theme_survminer(font.caption = c(24),font.x = c(24),font.y = c(24),font.tickslab = c(24)),
+                    legend.title="") + 
+  guides(color=guide_legend(override.aes = list(size = 2)))
+
+KMPlot2<-KMPlot2$plot+ coord_cartesian(xlim = c(0, 105))
+KMPlot2
+
+##Kaplan-Meier (K-M) non-parametric analysis by group##
+#Gender group
+KMSurvival2_Gender <- survfit(Surv(Hospitalization.time,event) ~ Gender, data=Survival2)
+summary(KMSurvival2_Gender)
+KMPlot2_Gender<-ggsurvplot(KMSurvival2_Gender,
+                           xlab= "", ylab= "Survival probability",
+                           legend.title="Gender",pval = TRUE, pval.coord = c(1, 0.55), pval.size= 8,
+                           conf.int = F, conf.int.alpha= 0.2, font.legend = list(size = 24, face = "bold"),
+                           legend.labs= c("Female","Male"),
+                           ylim= c(0.5,1),
+                           risk.table.fontsize = 5.5,
+                           censor= T, censor.shape= 124, censor.size= 2,
+                           risk.table = F, palette = "lancet",
+                           surv.scale="percent", 
+                           ggtheme = theme_survminer(font.caption = c(24),font.x = c(24),font.y = c(24),font.tickslab = c(24)),
+                           axes.offset=FALSE, break.x.by=10,break.y.by=0.1) + 
+  guides(color=guide_legend(override.aes = list(size = 2)))
+
+KMPlot2_Gender<-KMPlot2_Gender$plot+ coord_cartesian(xlim = c(0, 105))
+KMPlot2_Gender
+
+#Age group
+KMSurvival2_Age <- survfit(Surv(Hospitalization.time,event) ~ Age.Group, data=Survival2)
+summary(KMSurvival2_Age)
+KMPlot2_Age<-ggsurvplot(KMSurvival2_Age,
+                        xlab= "", ylab= "Survival probability",
+                        legend.title="Age",pval = TRUE, pval.coord = c(1, 0.55), pval.size= 8,
+                        conf.int = F, conf.int.alpha= 0.2, font.legend = list(size = 24, face = "bold"),
+                        legend.labs= c("0-14","15-24","25-44","45-64","65+"),
+                        ylim= c(0.5,1),
+                        risk.table.fontsize = 5.5,
+                        censor= T, censor.shape= 124, censor.size= 2,
+                        risk.table = F, palette = "lancet",
+                        surv.scale="percent", 
+                        ggtheme = theme_survminer(font.caption = c(24),font.x = c(24),font.y = c(24),font.tickslab = c(24)),
+                        axes.offset=FALSE, break.x.by=10,break.y.by=0.1) + 
+  guides(color=guide_legend(override.aes = list(size = 2)))
+
+KMPlot2_Age<-KMPlot2_Age$plot+ coord_cartesian(xlim = c(0, 105))
+KMPlot2_Age
+
+#Income Regions Group
+KMSurvival2_Income <- survfit(Surv(Hospitalization.time,event) ~ Income.Region, data=Survival2)
+summary(KMSurvival2_Income)
+KMPlot2_Income<-ggsurvplot(KMSurvival2_Income,
+                           xlab= "Day", ylab= "Survival probability",
+                           legend.title="Income region",pval = TRUE, pval.coord = c(1, 0.55), pval.size= 8,
+                           legend.labs= c("High income region","Low income region","Middle income region"),
+                           conf.int = F, conf.int.alpha= 0.2, font.legend = list(size = 24, face = "bold"),
+                           ylim= c(0.5,1),
+                           risk.table.fontsize = 5.5,
+                           censor= T, censor.shape= 124, censor.size= 2,
+                           risk.table = F, palette = "lancet",
+                           surv.scale="percent", 
+                           ggtheme = theme_survminer(font.caption = c(24),font.x = c(24),font.y = c(24),font.tickslab = c(24)),
+                           axes.offset=FALSE, break.x.by=10,break.y.by=0.1) + 
+  guides(color=guide_legend(nrow=2,override.aes = list(size = 2)))
+
+KMPlot2_Income<-KMPlot2_Income$plot+ coord_cartesian(xlim = c(0, 105))
+KMPlot2_Income
+
+Figure5<-ggarrange(KMPlot2,KMPlot2_Gender,KMPlot2_Age,KMPlot2_Income,
+                   labels = c("A","B","C","D"), font.label = list(size = 19),
+                   ncol = 2, nrow = 2)
+
+#Cox proportional hazard model & Assumption#
+Coxph_Total<- coxph(Surv(Hospitalization.time,event) ~ Age.Group2 + Gender + Income.Region, Survival)
+TableS3<-summary(Coxph_Total)
+TableS3
+
+Coxph_Symptomatic<- coxph(Surv(Hospitalization.time,event) ~ Age.Group2 + Gender + Income.Region + Delay.Time3, data =  Survival2)
+Table2<-summary(Coxph_Symptomatic)
+Table2
+
+TableS1<- cox.zph(Coxph_Symptomatic)
+TableS1
+
+#Correlation
+DD<-read.csv("dis_inc_cfr.csv")
+DS<-read.csv("dis_inc_cfr_symptomatic.csv")
+Covid<-read.csv("Covid model.csv")
+Covid2<-read.csv("Covid model_symptomatic.csv")
+
+#Matrix
+df<-data.frame(DD$inc_perk,DD$cfr_percent,DD$population_density,DD$Income, DD$Average.Age,DD$Average.Patient.Age,DD$aht)
+rcorr(as.matrix(df))
+
+df2<-data.frame(DS$inc_perk,DS$cfr_percent,DS$population_density,DS$Income,DS$adt, DS$Average.Age,DS$Average.Patient.Age,DS$aht)
+rcorr(as.matrix(df2))
+
+df3<-data.frame(Covid$event,Covid$Numeric_Gender,Covid$Age,Covid$Hospitalization.time)
+rcorr(as.matrix(df3))
+
+df4<-data.frame(Covid2$event,Covid2$Numeric.Gender,Covid2$Age,Covid2$Hospitalization.time,Covid2$Delay.Time)
+rcorr(as.matrix(df4))
+
+#Correlation Function
+cor.mtest <- function(mat, ...) {
+  mat <- as.matrix(mat)
+  n <- ncol(mat)
+  p.mat<- matrix(NA, n, n)
+  diag(p.mat) <- 0
+  for (i in 1:(n - 1)) {
+    for (j in (i + 1):n) {
+      tmp <- cor.test(mat[, i], mat[, j], ...)
+      p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
+    }
+  }
+  colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
+  p.mat
+}
+
+#Correlation Matrix
+M1<-cor(df)
+colnames(M1) <- c("CI", "CFR", "Population Density", "Median Income", "Average Age", "Average Patient Age","Average Hospitalization Time")
+rownames(M1) <- c("CI", "CFR", "Population Density", "Median Income", "Average Age", "Average Patient Age","Average Hospitalization Time")
+head(M1)
+p.mat <- cor.mtest(df)
+colnames(p.mat) <- c("CI", "CFR", "Population Density", "Median Income", "Average Age", "Average Patient Age","Average Hospitalization Time")
+rownames(p.mat) <- c("CI", "CFR", "Population Density", "Median Income", "Average Age", "Average Patient Age","Average Hospitalization Time")
+head(p.mat)
+FigureS1A<-corrplot(M1, method="color", tl.col="black", tl.srt=75, type="upper",p.mat = p.mat,
+                    sig.level = 0.05, title = "Total patients",mar=c(0,0,1,0))
+
+M2<-cor(df2)
+colnames(M2) <- c("CI", "CFR", "Population Density", "Median Income", "Average Delay Time", "Average Age", "Average Patient Age", "Average Hospitalization Time")
+rownames(M2) <- c("CI", "CFR", "Population Density", "Median Income", "Average Delay Time", "Average Age", "Average Patient Age", "Average Hospitalization Time")
+head(M2)
+p2.mat <- cor.mtest(df2)
+colnames(p2.mat) <- c("CI", "CFR", "Population Density", "Median Income", "Average Delay Time", "Average Age", "Average Patient Age", "Average Hospitalization Time")
+rownames(p2.mat) <- c("CI", "CFR", "Population Density", "Median Income", "Average Delay Time", "Average Age", "Average Patient Age", "Average Hospitalization Time")
+head(p2.mat)
+FigureS1B<-corrplot(M2, method="color", tl.col="black", tl.srt=75, type="upper",p.mat = p2.mat,
+                    sig.level = 0.05, title = "Symptomatic patients",mar=c(0,0,1,0))
+
+M3<-cor(df3)
+colnames(M3) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time")
+rownames(M3) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time")
+p3.mat <- cor.mtest(df3)
+colnames(p3.mat) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time")
+rownames(p3.mat) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time")
+head(p3.mat)
+FigureS3A<-corrplot(M3, method="color", tl.col="black", tl.srt=75, type="upper",p.mat = p3.mat,
+                    sig.level = 0.05, title = "Total patients",mar=c(0,0,1,0))
+
+M4<-cor(df4)
+head(M4)
+colnames(M4) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time", "Report Delay Time")
+rownames(M4) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time", "Report Delay Time")
+p4.mat <- cor.mtest(df4)
+colnames(p4.mat) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time", "Report Delay Time")
+rownames(p4.mat) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time", "Report Delay Time")
+head(p4.mat)
+FigureS3B<-corrplot(M4, method="color", tl.col="black", tl.srt=75, type="upper",p.mat = p4.mat,
+                    sig.level = 0.05, title = "Symptomatic patients",mar=c(0,0,1,0))
+
+#Time-Series Data
+Patient<-read.csv("Patient.csv")
+Latest<-read.csv("Latest Situation.csv")
+
+#Data management
+Patient$Date.of.onset<-dmy(Patient$Date.of.onset)
+Patient$Report.date<-dmy(Patient$Report.date)
+Latest$Report.date<-dmy(Latest$Report.date)
+
+Symptomatic.P<-na.exclude(Patient)
+Symptomatic.P<-Symptomatic.P%>%filter(Date.of.onset >= as.Date("2019-01-23"))
+Symptomatic.P<-Symptomatic.P%>%count(Report.date)
+setnames(Symptomatic.P,"n","Symptomatic.case")
+
+Date<-merge(Latest, Symptomatic.P, by = "Report.date",all = TRUE)
+Date$Symptomatic.case[is.na(Date$Symptomatic.case)] = 0
+
+Latest<-Latest%>% mutate(Daily= Number.of.confirmed.cases - lag(Number.of.confirmed.cases, default = 0))
+Latest<-Latest%>% mutate(Death= Number.of.death.cases - lag(Number.of.death.cases, default = 0))
+
+#Time-Series Plot
+Total.Cases <- ggplot(Latest, aes(x=Report.date, y=Daily)) + geom_line() + 
+  scale_x_date(breaks = seq(as.Date("2020-01-23"), as.Date("2021-10-04"), by="20 day"),expand = c(0,0),limits = c(as.Date("2020-01-23"), as.Date("2021-10-15"))) + 
+  theme(axis.text.x=element_text(angle=90, hjust=1)) +
+  labs(x="", y="Daily number of confirmed cases") + 
+  theme(plot.title = element_text(hjust=0.5, size=20, face="bold"), axis.text=element_text(size=16),
+        axis.title = element_text(size = 18),axis.text.x = element_blank()) + 
+  scale_y_continuous(expand=c(0,0),limits = c(0, 155),breaks = seq(0, 150, 25))
+Total.Cases
+
+Symptomatic.Cases <- ggplot(Date, aes(x=Report.date, y=Symptomatic.case)) + geom_line() + 
+  scale_x_date(breaks = seq(as.Date("2020-01-23"), as.Date("2021-10-04"), by="20 day"), 
+               expand = c(0,0),limits = c(as.Date("2020-01-23"), as.Date("2021-10-15"))) + 
+  theme(axis.text.x=element_text(angle=90, hjust=1)) +
+  labs(x="", y="Daily number of symptomatic cases") + 
+  theme(plot.title = element_text(hjust=0.5, size=20, face="bold"), axis.text=element_text(size=16),
+        axis.title = element_text(size = 18),axis.text.x = element_blank()) + 
+  scale_y_continuous(expand=c(0,0),limits = c(0, 130))
+Symptomatic.Cases
+
+Death.Cases <- ggplot(Latest, aes(x=Report.date, y=Death)) + geom_line() + 
+  scale_x_date(breaks = seq(as.Date("2020-01-23"), as.Date("2021-10-04"), by="20 day"),expand = c(0,0),limits = c(as.Date("2020-01-23"), as.Date("2021-10-15"))) + 
+  theme(axis.text.x=element_text(angle=90, hjust=1)) +
+  labs(x="", y="Daily number of deaths") + 
+  theme(plot.title = element_text(hjust=0.5, size=20, face="bold"), axis.text=element_text(size=16),
+        axis.title = element_text(size = 18)) + 
+  scale_y_continuous(expand=c(0,0),limits = c(0, 6))
+Death.Cases
+
+Figure<-ggarrange(Total.Cases , Symptomatic.Cases, Death.Cases, labels = c("A","B",'C'), 
+                  align = "v",heights = c(1,1,1.228),nrow = 3)
