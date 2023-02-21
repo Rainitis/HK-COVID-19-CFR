@@ -9,6 +9,17 @@ library(ggrepel)
 library(patchwork)
 library(reshape2)
 library(tidyr)
+library(ggplot2)
+library(plyr)
+library(ggpubr)
+library(data.table)
+library(carData)
+library(car)
+library(pscl)
+library(ggrepel)
+library(patchwork)
+library(reshape2)
+library(tidyr)
 library(survival)
 library(survminer)
 library(dplyr)
@@ -24,6 +35,21 @@ options(ggrepel.max.overlaps = Inf)
 DD<-read.csv("dis_inc_cfr.csv")
 DS<-read.csv("dis_inc_cfr_symptomatic.csv")
 TS<-read.csv("Territory_symptomatic.csv")
+
+#Data Management
+Covid2_Elderly<-Covid2%>%group_by(Age)%>%filter(any(Age>64))
+Covid2_Elderly_Death<-Covid2_Elderly%>%group_by(event)%>%filter(any(event=="1"))
+Covid2_Elderly_Cases.in.district<-Covid2_Elderly%>%group_by(district)%>%summarise(Total=n())
+Covid2_Elderly_Death.in.district<-Covid2_Elderly_Death%>%group_by(district)%>%summarise(Death=n())
+new_row1 = list("Tai Po",0)
+new_row2 = list(district="Sai Kung",Death=0)
+Covid2_Elderly_Death.in.district = rbind(Covid2_Elderly_Death.in.district,new_row1)
+Covid2_Elderly_Death.in.district = rbind(Covid2_Elderly_Death.in.district,new_row2)
+Covid2_Elderly.in.district=left_join(Covid2_Elderly_Cases.in.district, Covid2_Elderly_Death.in.district)
+Covid2_Elderly.in.district<-Covid2_Elderly.in.district%>%mutate(CFR_elderly=round(Death/Total*100,2))
+colnames(Covid2_Elderly.in.district)[c(1)]<-c("District")
+CFR_Overview=left_join(Covid2_Elderly.in.district, DS)
+CFR_Overview<-subset(CFR_Overview,select =c(District,CFR_elderly,cfr_percent,income_trans,population_density))
 
 #Scatter Plot_Total#
 Scatter_Total_CI_I<-ggplot(DD,aes(x=Income_1k, y=Cumulative.Incidence.Rate_percentage, size =population_density, label=District)) + 
@@ -109,6 +135,30 @@ Figure2<-ggarrange(Scatter_Symptomatic_CI_I,Scatter_Symptomatic_CFR_I,Scatter_Sy
                    labels = c("A","B","C","D"),font.label = list(size = 16),
                    ncol = 2, nrow = 2)
 
+Scatter_CFR_Comparsion<-ggplot(CFR_Overview,aes(x=cfr_percent, y=CFR_elderly, label=District)) + 
+  geom_label_repel(size = 8.5,min.segment.length = 0, box.padding = 0.5)+ geom_point(alpha=0.7,size=5)+
+  xlab("Case fatality rate in symptomatic patients (%)") + ylab(" Case fatality rate in elderly (%)") + 
+  scale_x_continuous(expand= c(0,0), limits = c(0,4.5),breaks = seq(0, 4, 1)) +
+  scale_y_continuous(expand=c(0,0.1), limits=c(0,18), breaks= seq(0,18,2))+
+  theme(axis.text=element_text(size=32), axis.title = element_text(size = 32)) 
+Scatter_CFR_Comparsion
+
+Scatter_Symptomatic_Elderly_CFR_I<-ggplot(CFR_Overview,aes(x=income_trans, y=CFR_elderly, size =population_density, label=District)) + 
+  geom_vline(xintercept=c(mean(CFR_Overview$income_trans)), linetype="dashed",lwd=1) +
+  geom_label_repel(size = 8.5,min.segment.length = 0, box.padding = 0.5)+ geom_point(alpha=0.7) +
+  xlab("Median monthly income (HKD$ '000)") + ylab("Case fatality rate in elderly (%)") + 
+  scale_x_continuous(expand= c(0,0), limits = c(20,46),breaks = seq(20, 46, 4)) +
+  scale_y_continuous(expand=c(0,0.1), limits=c(0,20), breaks= seq(0,20,2)) + 
+  labs(size="Population density")+
+  theme(axis.text=element_text(size=30), axis.title = element_text(size = 32), 
+        legend.position = c(0.8,0.835), legend.title = element_text(size=28), 
+        legend.text = element_text(size=26))
+Scatter_Symptomatic_Elderly_CFR_I
+
+FigureSX<-ggarrange(Scatter_Symptomatic_Elderly_CFR_I, Scatter_CFR_Comparsion,
+                    labels = c("A","B"), font.label = list(size = 34),
+                    nrow = 1)
+
 #Bar Chart_Symptomatic
 level_order_TS<- factor(TS$Territory, level = c("KLE", "KLW", "NTW","HK","NTE"))
 
@@ -127,7 +177,7 @@ TS_CDP<-ggplot(TS, aes(x = level_order_TS, y = CDPinPop_percent, label=CDPinPop_
   ggtitle("People with chronic disease") + ylab("Percentage (%)") +
   xlab("Territories") +
   geom_text(size = 5, position = position_stack(vjust =0.98), color="white") +
-  scale_y_continuous(expand= c(0,0)) + coord_cartesian(ylim = c(20, 26)) +
+  scale_y_continuous(expand= c(0,0),breaks = seq(0, 30, 5)) + coord_cartesian(ylim = c(0, 30)) +
   theme(axis.text=element_text(size=16), axis.title = element_text(size = 15),plot.title = element_text(size = 15))
 TS_CDP
 
@@ -220,6 +270,32 @@ Bar_Percentage
 Figure4<-ggarrange(Bar_Delay_Total_LMH,Bar_Delay_Elderly_LMH,Bar_Percentage,
                    labels = c("A","B","C"),
                    ncol = 1,nrow=3)
+
+#CFR over hospitalization time
+Covid2_Alive<-Covid2%>%group_by(Income.Region,event)%>%filter(any(event == "0"))%>% count(Hospitalization.time)%>% mutate(percentage=n/sum(n)*100)
+Covid2_Dead<-Covid2%>%group_by(Income.Region,event)%>%filter(any(event == "1"))%>% count(Hospitalization.time)%>% mutate(percentage=n/sum(n)*100)
+
+Covid2_Alive.Hist<-ggplot(Covid2_Alive, aes(x=Hospitalization.time, y = percentage, label=percentage)) + 
+  scale_x_continuous(expand= c(0,0), limits = c(0,100),breaks = seq(0, 100, 10)) +
+  geom_bar(stat = "identity") + scale_y_continuous(expand= c(0,0), limits = c(0,8.5),breaks = seq(0, 10, 1)) + 
+  facet_grid(factor(Income.Region, levels=c("Low Income Region", "Middle Income Region","High Income Region"))~.) + 
+  labs(title="Alive group distribution",x="Hospitalization time (Days))", y = "Percentage (%)") + 
+  theme(panel.spacing.y = unit(22, "pt"),strip.text.y = element_text(size = 28), 
+        axis.text=element_text(size=28), axis.title = element_text(size = 30),plot.title = element_text(size = 32))
+Covid2_Alive.Hist
+
+Covid2_Dead.Hist<-ggplot(Covid2_Dead, aes(x=Hospitalization.time, y = percentage, label=percentage)) + 
+  scale_x_continuous(expand= c(0,0), limits = c(0,100),breaks = seq(0, 100, 10)) +
+  geom_bar(stat = "identity") + scale_y_continuous(expand= c(0,0), limits = c(0,30),breaks = seq(0, 30, 5)) + 
+  facet_grid(factor(Income.Region, levels=c("Low Income Region", "Middle Income Region","High Income Region"))~.) + 
+  labs(title="Dead group distribution",x="Hospitalization time (Days))", y = "Percentage (%)") + 
+  theme(panel.spacing.y = unit(22, "pt"),strip.text.y = element_text(size = 28), 
+        axis.text=element_text(size=28), axis.title = element_text(size = 30),plot.title = element_text(size = 32))
+Covid2_Dead.Hist
+
+FigureSA<-ggarrange(Alive.Hist2,Dead.Hist2,
+                    labels = c("A","B"),font.label = list(size = 24),
+                    ncol = 1, nrow = 2)
 
 #Survival Analysis
 Covid<-read.csv("Covid model.csv")
@@ -421,6 +497,7 @@ DD<-read.csv("dis_inc_cfr.csv")
 DS<-read.csv("dis_inc_cfr_symptomatic.csv")
 Covid<-read.csv("Covid model.csv")
 Covid2<-read.csv("Covid model_symptomatic.csv")
+Covid2_Dead<-Covid2%>%group_by(event)%>%filter(any(event=="1"))
 
 #Matrix
 df<-data.frame(DD$inc_perk,DD$cfr_percent,DD$population_density,DD$Income, DD$Average.Age,DD$Average.Patient.Age,DD$aht)
@@ -434,6 +511,9 @@ rcorr(as.matrix(df3))
 
 df4<-data.frame(Covid2$event,Covid2$Numeric.Gender,Covid2$Age,Covid2$Hospitalization.time,Covid2$Delay.Time)
 rcorr(as.matrix(df4))
+
+df5<-data.frame(Covid2_Dead$Numeric.Gender,Covid2_Dead$Age,Covid2_Dead$Hospitalization.time,Covid2_Dead$Delay.Time)
+rcorr(as.matrix(df5))
 
 #Correlation Function
 cor.mtest <- function(mat, ...) {
@@ -494,6 +574,17 @@ rownames(p4.mat) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Ti
 head(p4.mat)
 FigureS3B<-corrplot(M4, method="color", tl.col="black", tl.srt=75, type="upper",p.mat = p4.mat,
                     sig.level = 0.05, title = "Symptomatic patients",mar=c(0,0,1,0))
+
+M5<-cor(df5)
+head(M5)
+colnames(M5) <- c("Gender", "Age", "Hospitalization Time", "Report Delay Time")
+rownames(M5) <- c("Gender", "Age", "Hospitalization Time", "Report Delay Time")
+p5.mat <- cor.mtest(df5)
+colnames(p5.mat) <- c("Gender", "Age", "Hospitalization Time", "Report Delay Time")
+rownames(p5.mat) <- c("Gender", "Age", "Hospitalization Time", "Report Delay Time")
+head(p5.mat)
+FigureS7<-corrplot(M5, method="color", tl.col="black", tl.srt=75, type="upper",
+                   p.mat = p5.mat, sig.level = 0.05,title = "Symptomatic Deceased patients",mar=c(0,0,1,0))
 
 #Time-Series Data
 Patient<-read.csv("Patient.csv")
