@@ -370,21 +370,9 @@ FigureS7<-corrplot(M5, method="color", tl.col="black", tl.srt=75, type="upper",
                    p.mat = p5.mat, sig.level = 0.05,title = "Symptomatic Deceased patients",mar=c(0,0,1,0))
 
 #Time-Series Plot
-Patient<-read.csv("Patient.csv")
 Latest<-read.csv("Latest Situation.csv")
 
-Patient$Date.of.onset<-dmy(Patient$Date.of.onset)
-Patient$Report.date<-dmy(Patient$Report.date)
 Latest$Report.date<-dmy(Latest$Report.date)
-
-Symptomatic.P<-na.exclude(Patient)
-Symptomatic.P<-Symptomatic.P%>%filter(Date.of.onset >= as.Date("2019-01-23"))
-Symptomatic.P<-Symptomatic.P%>%count(Report.date)
-setnames(Symptomatic.P,"n","Symptomatic.case")
-
-Date<-merge(Latest, Symptomatic.P, by = "Report.date",all = TRUE)
-Date$Symptomatic.case[is.na(Date$Symptomatic.case)] = 0
-
 Latest<-Latest%>% mutate(Daily= Number.of.confirmed.cases - lag(Number.of.confirmed.cases, default = 0))
 Latest<-Latest%>% mutate(Death= Number.of.death.cases - lag(Number.of.death.cases, default = 0))
 
