@@ -380,12 +380,15 @@ Latest<-Latest%>% mutate(Death= Number.of.death.cases - lag(Number.of.death.case
 Total.Death.Cases<-ggplot(Latest, aes(x=Report.date)) +
   geom_line(aes(y=Daily),size=1,color="red") + 
   geom_bar(aes(y=Death*30),width = 0.01,stat = "identity",color="blue") +  
-  scale_x_date(breaks = seq(as.Date("2020-01-23"), as.Date("2021-10-04"), by="155 day"),expand = c(0,0),limits = c(as.Date("2020-01-23"), as.Date("2021-10-15"))) + 
+  scale_x_date(date_labels = "%Y-%m", 
+               breaks = seq(as.Date("2020-02-1"), as.Date("2021-10-1"), by="6 month"),expand = c(0,0),limits = c(as.Date("2020-01-23"), as.Date("2021-10-15"))) + 
   labs(x="") + 
   theme(axis.text.x=element_text(hjust=0.5)) +
-  scale_y_continuous(name="Daily number of confirmed cases",expand=c(0,0),limits = c(-2, 155),breaks = seq(0, 150, 30), 
-                     sec.axis = sec_axis(~./30,name = "Daily number of Death cases")) +   
-  theme(axis.text=element_text(size=32),
-        axis.title = element_text(size = 36,color="red"),
-        axis.title.y.right = element_text(size=36, color = "blue"))
-Total.Death.Cases
+  scale_y_continuous(name="Daily cases",expand=c(0,0),limits = c(-5, 155),breaks = seq(0, 150, 30), 
+                     sec.axis = sec_axis(~./30,name = "Daily Deaths")) +   
+  theme(axis.text.x=element_text(size=36,color = "#363636"),
+        axis.text.y=element_text(size=48),
+        axis.title = element_text(size = 42,color="red"),
+        axis.title.y.right = element_text(size=42, color = "blue"),
+        axis.ticks.length=unit(.15, "cm"),
+        axis.ticks = element_line(size = 1.05))
