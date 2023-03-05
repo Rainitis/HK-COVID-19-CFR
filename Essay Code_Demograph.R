@@ -178,12 +178,16 @@ Covid2<-read.csv("Covid model_symptomatic.csv")
 Covid2_Delay<-read.csv("DeathRisk.csv")
 Covid2_Delay2<-read.csv("DeathRisk_Individual.csv")
 Covid2_agepercent<-read.csv("Covid model_symptomatic_2Income.csv")
+Covid2_agepercent2<-read.csv("Covid model_symptomatic_70_2Income.csv")
 
 Covid2$Income.Region<-factor(Covid2$Income.Region,levels=c("Low Income Region","Middle Income Region","High Income Region"))
 Covid2$Grouped.Delay.Time <- factor(Covid2$Grouped.Delay.Time, level = c("0", "1", "2","3","4","5","6","7","8","9","10",">10"))
 
 Covid2_agepercent$Income.Region<-factor(Covid2_agepercent$Income.Region,levels=c("High Income Region","Low and Middle Income Region"))
-Covid2_agepercent$Gender.Age<-factor(Covid2_agepercent$Gender.Age,levels=c("Male(≤65 years old)","Female(≤65 years old)","Male(>65 years old)","Female(>65 years old)"))
+Covid2_agepercent$Gender.Age<-factor(Covid2_agepercent$Gender.Age,levels=c("Male(≤64 years old)","Female(≤64 years old)","Male(>64 years old)","Female(>64 years old)"))
+
+Covid2_agepercent2$Income.Region<-factor(Covid2_agepercent2$Income.Region,levels=c("High Income Region","Low and Middle Income Region"))
+Covid2_agepercent2$Gender.Age<-factor(Covid2_agepercent2$Gender.Age,levels=c("Male(≤69 years old)","Female(≤69 years old)","Male(>69 years old)","Female(>69 years old)"))
 
 #Subset Data
 Covid2_65<-Covid2 %>% filter(is.na(Age) | Age >= 65)
@@ -255,8 +259,21 @@ Bar_Percentage<-ggplot(Covid2_agepercent, aes(x= fct_rev(Income.Region), y= Perc
         axis.title = element_text(size = 24), axis.text.y =element_text(size= 24, angle = 90,vjust = 0.7, hjust=0.5,color = "#000000"),
         legend.position = c(0.8,0.8), legend.key.size = unit(1,"cm"),
         legend.title = element_text(size=20),legend.text = element_text(size=18)) +
-  scale_fill_manual(values = c("Male(≤65 years old)" = "#ADD8E6","Female(≤65 years old)" = "#ffcccb","Male(>65 years old)" = "#00008B","Female(>65 years old)" = "#8b0000"))
+  scale_fill_manual(values = c("Male(≤64 years old)" = "#ADD8E6","Female(≤64 years old)" = "#ffcccb","Male(>64 years old)" = "#00008B","Female(>64 years old)" = "#8b0000"))
 Bar_Percentage
+
+Bar_Percentage_70<-ggplot(Covid2_agepercent2, aes(x= fct_rev(Income.Region), y= Percentage, fill = fct_rev(Gender.Age))) + 
+  ggtitle("Symptomatic patients") + xlab("") + coord_flip() +
+  ylab("Percentage with severe reporting delay (>10 days)") + scale_x_discrete(labels= my.labels) +
+  geom_col(width = 0.6, position = position_dodge(0.7)) +
+  scale_fill_viridis_d(breaks = rev, direction = -1) +
+  scale_y_continuous(expand=c(0,0), limits = c(0, 13), breaks = seq(0, 12, 2)) + labs(fill="Income Region") +
+  theme(plot.title = element_text(size=24), axis.text.x=element_text(size= 22), 
+        axis.title = element_text(size = 24), axis.text.y =element_text(size= 24, angle = 90,vjust = 0.7, hjust=0.5,color = "#000000"),
+        legend.position = c(0.8,0.8), legend.key.size = unit(1,"cm"),
+        legend.title = element_text(size=20),legend.text = element_text(size=18)) +
+  scale_fill_manual(values = c("Male(≤69 years old)" = "#ADD8E6","Female(≤69 years old)" = "#ffcccb","Male(>69 years old)" = "#00008B","Female(>69 years old)" = "#8b0000"))
+Bar_Percentage_70
 
 Figure4<-ggarrange(Bar_Delay_Total_LMH,Bar_Delay_Elderly_LMH,Bar_Percentage,
                    labels = c("A","B","C"),
@@ -392,3 +409,5 @@ Total.Death.Cases<-ggplot(Latest, aes(x=Report.date)) +
         axis.title.y.right = element_text(size=42, color = "blue"),
         axis.ticks.length=unit(.15, "cm"),
         axis.ticks = element_line(size = 1.05))
+Total.Death.Cases
+
