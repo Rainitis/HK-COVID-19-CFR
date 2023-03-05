@@ -105,7 +105,7 @@ KMPlot_Income<-ggsurvplot(KMSurvival_Income,
 KMPlot_Income<-KMPlot_Income$plot+ coord_cartesian(xlim = c(0, 105))
 KMPlot_Income
 
-FigureS5<-ggarrange(KMPlot,KMPlot_Gender,KMPlot_Age,KMPlot_Income,
+FigureS7<-ggarrange(KMPlot,KMPlot_Gender,KMPlot_Age,KMPlot_Income,
                     labels = c("A","B","C","D"), font.label = list(size = 19),
                     ncol = 2, nrow = 2)
 
@@ -194,12 +194,12 @@ Figure5<-ggarrange(KMPlot2,KMPlot2_Gender,KMPlot2_Age,KMPlot2_Income,
 
 #Cox proportional hazard model & Assumption#
 Coxph_Total<- coxph(Surv(Hospitalization.time,event) ~ Age.Group2 + Gender + Income.Region, Survival)
-TableS3<-summary(Coxph_Total)
-TableS3
+TableS4<-summary(Coxph_Total)
+TableS4
 
 Coxph_Symptomatic<- coxph(Surv(Hospitalization.time,event) ~ Age.Group2 + Gender + Income.Region + Grouped.Delay.Time.2, data =  Survival2)
 Table2<-summary(Coxph_Symptomatic)
 Table2
 
-TableS1<- cox.zph(Coxph_Symptomatic)
-TableS1
+TableS3<- cox.zph(Coxph_Symptomatic)
+TableS3
