@@ -6,7 +6,7 @@ Before runing the R scripts, please download all the .csv files in this reposito
 
 There are 2 .R scripts in this repository, which describes the demographic of Covid-19 patients in Hong Kong with different groups and the survival analysis respectively (Essay Code_Demograph.R and Essay Code_Survival Anlysis.R).
 
-In Essay Code_Demograph.R, it is divided into 4 different parts: The demographic of district/territory, the correlation matrix in Covid-19 patients, the case fatality rate (CFR) among reporting delay & hospitalization time, and time series plot of Covid-19 cases & death. To generate the picture you required, you  need to run all the packages/codes mentioned in the top 19 lines of code. Then,use Ctrl + F and type the following sentences to find your target figure:
+In Essay Code_Demograph.R, it is divided into 4 different parts: The demographic of district/territory, the correlation matrix in Covid-19 patients, the case fatality rate (CFR) among reporting delay & hospitalization time, and time series plot of Covid-19 cases & death. To generate the picture you required, you  need to run all the packages/codes mentioned in the top 19 lines of code. Then,use Ctrl + F to open the search function and type the following sentences to find your target figure:
 
 For the demographic of district/territory: #District & Territory Demographic.
 
