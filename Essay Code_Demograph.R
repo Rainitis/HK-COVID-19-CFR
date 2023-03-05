@@ -76,7 +76,7 @@ Scatter_Total_CFR_PD<-Scatter_Total_CFR_PD + scale_x_continuous(expand= c(0,0), 
   theme(axis.text=element_text(size=18), axis.title = element_text(size = 17))
 Scatter_Total_CFR_PD
 
-FigureS4<-ggarrange(Scatter_Total_CI_I,Scatter_Total_CFR_I,Scatter_Total_CI_PD,Scatter_Total_CFR_PD,
+FigureS6<-ggarrange(Scatter_Total_CI_I,Scatter_Total_CFR_I,Scatter_Total_CI_PD,Scatter_Total_CFR_PD,
                     labels = c("A","B","C","D"),font.label = list(size = 16),
                     ncol = 2, nrow = 2)
 
@@ -143,7 +143,7 @@ Scatter_Symptomatic_Elderly_CFR_I<-ggplot(CFR_Overview,aes(x=income_trans, y=CFR
         legend.text = element_text(size=26))
 Scatter_Symptomatic_Elderly_CFR_I
 
-FigureSX<-ggarrange(Scatter_Symptomatic_Elderly_CFR_I, Scatter_CFR_Comparsion,
+FigureS2<-ggarrange(Scatter_Symptomatic_Elderly_CFR_I, Scatter_CFR_Comparsion,
                     labels = c("A","B"), font.label = list(size = 34),
                     nrow = 1)
 
@@ -169,7 +169,7 @@ TS_CDP<-ggplot(TS, aes(x = level_order_TS, y = CDPinPop_percent, label=CDPinPop_
   theme(axis.text=element_text(size=16), axis.title = element_text(size = 15),plot.title = element_text(size = 15))
 TS_CDP
 
-FigureS2<-ggarrange(TS_CFR,TS_CDP,
+FigureS3<-ggarrange(TS_CFR,TS_CDP,
                     labels = c("A","B"),
                     ncol = 2)
 
@@ -221,7 +221,7 @@ CFR_delay2<-ggplot(Covid2_Delay2,aes(x=Delay.time, y=CFR_3days,group=1)) + geom_
   theme(axis.text=element_text(size= 28), axis.title = element_text(size = 30))
 CFR_delay2
 
-Figure3<-ggarrange(CFR_delay, CFR_delay2,
+Figure3AB<-ggarrange(CFR_delay, CFR_delay2,
                    labels = c("A","B"),font.label = list(size = 24),
                    ncol = 1)
 
@@ -275,8 +275,8 @@ Bar_Percentage_70<-ggplot(Covid2_agepercent2, aes(x= fct_rev(Income.Region), y= 
   scale_fill_manual(values = c("Male(≤69 years old)" = "#ADD8E6","Female(≤69 years old)" = "#ffcccb","Male(>69 years old)" = "#00008B","Female(>69 years old)" = "#8b0000"))
 Bar_Percentage_70
 
-Figure4<-ggarrange(Bar_Delay_Total_LMH,Bar_Delay_Elderly_LMH,Bar_Percentage,
-                   labels = c("A","B","C"),
+Figure3CDE<-ggarrange(Bar_Delay_Total_LMH,Bar_Delay_Elderly_LMH,Bar_Percentage,
+                   labels = c("C","D","E"),
                    ncol = 1,nrow=3)
 
 #CFR over hospitalization time
@@ -312,9 +312,8 @@ Covid2_Dead<-Covid2%>%group_by(event)%>%filter(any(event=="1"))
 #Matrix
 df<-data.frame(DD$inc_perk,DD$cfr_percent,DD$population_density,DD$Income, DD$Average.Age,DD$Average.Patient.Age,DD$aht)
 df2<-data.frame(DS$inc_perk,DS$cfr_percent,DS$population_density,DS$Income,DS$adt, DS$Average.Age,DS$Average.Patient.Age,DS$aht)
-df3<-data.frame(Covid$event,Covid$Numeric_Gender,Covid$Age,Covid$Hospitalization.time)
-df4<-data.frame(Covid2$event,Covid2$Numeric.Gender,Covid2$Age,Covid2$Hospitalization.time,Covid2$Delay.Time)
-df5<-data.frame(Covid2_Dead$Numeric.Gender,Covid2_Dead$Age,Covid2_Dead$Hospitalization.time,Covid2_Dead$Delay.Time)
+df3<-data.frame(Covid2$event,Covid2$Numeric.Gender,Covid2$Age,Covid2$Hospitalization.time,Covid2$Delay.Time)
+df4<-data.frame(Covid2_Dead$Numeric.Gender,Covid2_Dead$Age,Covid2_Dead$Hospitalization.time,Covid2_Dead$Delay.Time)
 
 #Correlation Function
 cor.mtest <- function(mat, ...) {
@@ -356,35 +355,25 @@ FigureS1B<-corrplot(M2, method="color", tl.col="black", tl.srt=75, type="upper",
                     sig.level = 0.05, title = "Symptomatic patients",mar=c(0,0,1,0))
 
 M3<-cor(df3)
-colnames(M3) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time")
-rownames(M3) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time")
+head(M3)
+colnames(M3) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time", "Report Delay Time")
+rownames(M3) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time", "Report Delay Time")
 p3.mat <- cor.mtest(df3)
-colnames(p3.mat) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time")
-rownames(p3.mat) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time")
+colnames(p3.mat) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time", "Report Delay Time")
+rownames(p3.mat) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time", "Report Delay Time")
 head(p3.mat)
-FigureS3A<-corrplot(M3, method="color", tl.col="black", tl.srt=75, type="upper",p.mat = p3.mat,
-                    sig.level = 0.05, title = "Total patients",mar=c(0,0,1,0))
+Figure3F<-corrplot(M3, method="color", tl.col="black", tl.srt=75, type="upper",p.mat = p4.mat,
+                    sig.level = 0.05, title = "Symptomatic patients",mar=c(0,0,1,0))
 
 M4<-cor(df4)
 head(M4)
-colnames(M4) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time", "Report Delay Time")
-rownames(M4) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time", "Report Delay Time")
+colnames(M4) <- c("Gender", "Age", "Hospitalization Time", "Report Delay Time")
+rownames(M4) <- c("Gender", "Age", "Hospitalization Time", "Report Delay Time")
 p4.mat <- cor.mtest(df4)
-colnames(p4.mat) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time", "Report Delay Time")
-rownames(p4.mat) <- c("Deceased Condition", "Gender", "Age", "Hospitalization Time", "Report Delay Time")
+colnames(p4.mat) <- c("Gender", "Age", "Hospitalization Time", "Report Delay Time")
+rownames(p4.mat) <- c("Gender", "Age", "Hospitalization Time", "Report Delay Time")
 head(p4.mat)
-FigureS3B<-corrplot(M4, method="color", tl.col="black", tl.srt=75, type="upper",p.mat = p4.mat,
-                    sig.level = 0.05, title = "Symptomatic patients",mar=c(0,0,1,0))
-
-M5<-cor(df5)
-head(M5)
-colnames(M5) <- c("Gender", "Age", "Hospitalization Time", "Report Delay Time")
-rownames(M5) <- c("Gender", "Age", "Hospitalization Time", "Report Delay Time")
-p5.mat <- cor.mtest(df5)
-colnames(p5.mat) <- c("Gender", "Age", "Hospitalization Time", "Report Delay Time")
-rownames(p5.mat) <- c("Gender", "Age", "Hospitalization Time", "Report Delay Time")
-head(p5.mat)
-FigureS7<-corrplot(M5, method="color", tl.col="black", tl.srt=75, type="upper",
+FigureS4<-corrplot(M4, method="color", tl.col="black", tl.srt=75, type="upper",
                    p.mat = p5.mat, sig.level = 0.05,title = "Symptomatic Deceased patients",mar=c(0,0,1,0))
 
 #Time-Series Plot
@@ -394,7 +383,7 @@ Latest$Report.date<-dmy(Latest$Report.date)
 Latest<-Latest%>% mutate(Daily= Number.of.confirmed.cases - lag(Number.of.confirmed.cases, default = 0))
 Latest<-Latest%>% mutate(Death= Number.of.death.cases - lag(Number.of.death.cases, default = 0))
 
-Total.Death.Cases<-ggplot(Latest, aes(x=Report.date)) +
+Figure1B<-ggplot(Latest, aes(x=Report.date)) +
   geom_line(aes(y=Daily),size=1,color="red") + 
   geom_bar(aes(y=Death*30),width = 0.01,stat = "identity",color="blue") +  
   scale_x_date(date_labels = "%Y-%m", 
@@ -409,5 +398,5 @@ Total.Death.Cases<-ggplot(Latest, aes(x=Report.date)) +
         axis.title.y.right = element_text(size=42, color = "blue"),
         axis.ticks.length=unit(.15, "cm"),
         axis.ticks = element_line(size = 1.05))
-Total.Death.Cases
+Figure1B
 
