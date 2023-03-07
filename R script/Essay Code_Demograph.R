@@ -399,4 +399,3 @@ Figure1B<-ggplot(Latest, aes(x=Report.date)) +
         axis.ticks.length=unit(.15, "cm"),
         axis.ticks = element_line(size = 1.05))
 Figure1B
-
