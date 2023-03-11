@@ -1,4 +1,4 @@
-Income Region,Gender.Age,Number_65,Percentage_65
+Income Region,Gender.Age,Number,Percentage
 High Income Region,Female(≤64 years old),45,6.05
 High Income Region,Male(≤64 years old),56,7.24
 High Income Region,Female(>64 years old),11,7.75
